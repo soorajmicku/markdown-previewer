@@ -130,6 +130,6 @@ This project is licensed under the MIT License. This project is licensed under t
 ---
 
 ## **Contact**
-Created by **Sooraj Micku**  
+Created by **Sooraj Vijayan**  
 Feel free to contact me for feedback or collaboration!  
 Email: soorajmickub@gmail.com

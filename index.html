@@ -4,11 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown Previewer</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f9;
+      color: #333;
+    }
+    #app {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #555;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+    }
+    textarea, #markdown-preview {
+      flex: 1;
+      height: 400px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+    }
+    textarea:focus {
+      outline: 2px solid #007bff;
+    }
+    #markdown-preview {
+      overflow-y: auto;
+      background: #fdfdfd;
+    }
+    .actions {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #context-menu {
+      display: none;
+      position: absolute;
+      z-index: 1000;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+    }
+    #context-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #context-menu ul li {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    #context-menu ul li:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
     <h1>Markdown Previewer</h1>
+    <p class="instruction">Right-click in the text area below to access formatting options.</p>
     <div class="container">
       <!-- Input Section -->
       <textarea id="markdown-input" placeholder="Write your Markdown here..."></textarea>
@@ -22,10 +104,58 @@
       <button id="download-html">Download HTML</button>
       <button id="clear-input">Clear</button>
     </div>
+    <div id="context-menu">
+      <ul>
+        <li onclick="insertMarkdown('**bold**')">Bold</li>
+        <li onclick="insertMarkdown('*italic*')">Italic</li>
+        <li onclick="insertMarkdown('~~strikethrough~~')">Strikethrough</li>
+        <li onclick="insertMarkdown('`code`')">Code</li>
+        <li onclick="insertMarkdown('> Blockquote')">Blockquote</li>
+        <li onclick="insertMarkdown('# Heading 1\n')">Heading 1</li>
+        <li onclick="insertMarkdown('## Heading 2\n')">Heading 2</li>
+        <li onclick="insertMarkdown('### Heading 3\n')">Heading 3</li>
+        <li onclick="insertMarkdown('- List item')">List item</li>
+        <li onclick="insertMarkdown('1. Ordered list item')">Ordered list item</li>
+        <li onclick="insertMarkdown('![Alt text](url)')">Image</li>
+        <li onclick="insertMarkdown('[Link text](url)')">Link</li>
+        <li onclick="insertMarkdown('---')">Horizontal Rule</li>
+      </ul>
+    </div>
   </div>
-  <!-- Marked.js CDN -->
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- App Script -->
-  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const markdownInput = document.getElementById('markdown-input');
+      const markdownPreview = document.getElementById('markdown-preview');
+      const contextMenu = document.getElementById('context-menu');
+
+      document.addEventListener('click', function(event) {
+        if (!contextMenu.contains(event.target) && event.target !== markdownInput) {
+          contextMenu.style.display = 'none';
+        }
+      });
+
+      markdownInput.addEventListener('input', function() {
+        markdownPreview.innerHTML = marked.parse(markdownInput.value);
+      });
+
+      markdownInput.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        contextMenu.style.top = `${event.pageY}px`;
+        contextMenu.style.left = `${event.pageX}px`;
+        contextMenu.style.display = 'block';
+      });
+
+      window.insertMarkdown = function(syntax) {
+        const start = markdownInput.selectionStart;
+        const end = markdownInput.selectionEnd;
+        markdownInput.value = markdownInput.value.substring(0, start) + syntax + markdownInput.value.substring(end);
+        markdownInput.focus();
+        contextMenu.style.display = 'none';
+        markdownInput.dispatchEvent(new Event('input'));
+      };
+    });
+  </script>
 </body>
 </html>
